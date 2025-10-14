@@ -16,7 +16,7 @@ export default function TwoFactorSetup() {
   
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+      <h3 className="text-xl font-bold ">
         Two-Factor Authentication (2FA)
       </h3>
 
@@ -39,7 +39,7 @@ export default function TwoFactorSetup() {
                 <Smartphone className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h4 className="font-semibold text-slate-900 dark:text-white">Authenticator App</h4>
+                <h4 className="font-semibold ">Authenticator App</h4>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Recommended. Use an app like Google Authenticator or Authy.</p>
               </div>
             </div>
@@ -54,7 +54,7 @@ export default function TwoFactorSetup() {
                 <Smartphone className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <h4 className="font-semibold text-slate-900 dark:text-white">Text Message (SMS)</h4>
+                <h4 className="font-semibold ">Text Message (SMS)</h4>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Receive a code via SMS to your registered phone number.</p>
               </div>
             </div>
@@ -68,7 +68,7 @@ export default function TwoFactorSetup() {
           animate={{ opacity: 1 }}
           className="space-y-6"
         >
-          <h4 className="font-semibold text-slate-900 dark:text-white">Set up with an Authenticator App</h4>
+          <h4 className="font-semibold ">Set up with an Authenticator App</h4>
           <p className="text-slate-600 dark:text-slate-400">
             1. Install an authenticator app (e.g., Google Authenticator) on your device.
           </p>
@@ -82,7 +82,7 @@ export default function TwoFactorSetup() {
             Can't scan? Enter this key manually:
           </p>
           <div className="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-700 rounded-lg">
-            <span className="font-mono text-slate-900 dark:text-white">{setupKey}</span>
+            <span className="font-mono ">{setupKey}</span>
             <button 
               onClick={() => navigator.clipboard.writeText(setupKey)}
               className="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded"
@@ -105,7 +105,7 @@ export default function TwoFactorSetup() {
           animate={{ opacity: 1 }}
           className="space-y-6"
         >
-          <h4 className="font-semibold text-slate-900 dark:text-white">Verify Your Authenticator App</h4>
+          <h4 className="font-semibold ">Verify Your Authenticator App</h4>
           <p className="text-slate-600 dark:text-slate-400">
             Enter the 6-digit code from your authenticator app to complete setup.
           </p>
@@ -144,7 +144,7 @@ export default function TwoFactorSetup() {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-100 dark:bg-slate-700 p-4 rounded-xl">
             {backupCodes.map((code, index) => (
-              <span key={index} className="font-mono text-center text-slate-900 dark:text-white">
+              <span key={index} className="font-mono text-center ">
                 {code}
               </span>
             ))}

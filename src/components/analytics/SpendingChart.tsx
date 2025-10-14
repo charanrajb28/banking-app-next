@@ -1,4 +1,3 @@
-// src/components/analytics/SpendingChart.tsx
 'use client';
 
 import { useState } from 'react';
@@ -38,8 +37,15 @@ export default function SpendingChart({ timeRange }: SpendingChartProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-          <p className="font-semibold text-slate-900 dark:text-white mb-2">{label}</p>
+        <div
+          className="p-4 rounded-xl shadow-lg border"
+          style={{
+            backgroundColor: 'var(--card-bg)',
+            color: 'var(--card-text)',
+            borderColor: 'var(--card-border)',
+          }}
+        >
+          <p className="font-semibold mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: ${entry.value.toLocaleString()}
@@ -51,37 +57,58 @@ export default function SpendingChart({ timeRange }: SpendingChartProps) {
     return null;
   };
 
+  const axisColor = 'var(--card-text-secondary)';
+  const gridColor = 'var(--card-border)';
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg"
-    >
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  className="rounded-2xl p-6 shadow-lg"
+  style={{
+    backgroundColor: 'var(--card-bg)',
+    backgroundImage: `repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.05),
+      rgba(255,255,255,0.05) 1px,
+      transparent 1px,
+      transparent 20px
+    ), 
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.05),
+      rgba(255,255,255,0.05) 1px,
+      transparent 1px,
+      transparent 20px
+    )`,
+  }}
+>
+
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">Spending Trends</h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
+          <h3 className="text-xl font-bold" style={{ color: 'var(--card-text)' }}>Spending Trends</h3>
+          <p className="text-sm" style={{ color: 'var(--card-text-secondary)' }}>
             Track your income vs expenses over time
           </p>
         </div>
         <div className="flex space-x-2">
           <button
             onClick={() => setChartType('line')}
-            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-              chartType === 'line'
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
-            }`}
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors`}
+            style={{
+              backgroundColor: chartType === 'line' ? 'var(--accent)' : 'var(--card-bg-alt)',
+              color: chartType === 'line' ? 'white' : 'var(--card-text)',
+            }}
           >
             Line
           </button>
           <button
             onClick={() => setChartType('bar')}
-            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-              chartType === 'bar'
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
-            }`}
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors`}
+            style={{
+              backgroundColor: chartType === 'bar' ? 'var(--accent)' : 'var(--card-bg-alt)',
+              color: chartType === 'bar' ? 'white' : 'var(--card-text)',
+            }}
           >
             Bar
           </button>
@@ -92,60 +119,31 @@ export default function SpendingChart({ timeRange }: SpendingChartProps) {
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'line' ? (
             <LineChart data={spendingData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis 
-                dataKey="name" 
-                stroke="#64748b"
-                fontSize={12}
-              />
+              <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
+              <XAxis dataKey="name" stroke={axisColor} fontSize={12} />
               <YAxis 
-                stroke="#64748b"
-                fontSize={12}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                stroke={axisColor} 
+                fontSize={12} 
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} 
               />
               <Tooltip content={<CustomTooltip />} />
-              <Line 
-                type="monotone" 
-                dataKey="income" 
-                stroke="#10b981" 
-                strokeWidth={3}
-                dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-                name="Income"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="spending" 
-                stroke="#f59e0b" 
-                strokeWidth={3}
-                dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
-                name="Spending"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="savings" 
-                stroke="#3b82f6" 
-                strokeWidth={3}
-                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-                name="Savings"
-              />
+              <Line type="monotone" dataKey="income" stroke="var(--income-color)" strokeWidth={3} dot={{ r: 4 }} name="Income" />
+              <Line type="monotone" dataKey="spending" stroke="var(--spending-color)" strokeWidth={3} dot={{ r: 4 }} name="Spending" />
+              <Line type="monotone" dataKey="savings" stroke="var(--savings-color)" strokeWidth={3} dot={{ r: 4 }} name="Savings" />
             </LineChart>
           ) : (
             <BarChart data={spendingData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis 
-                dataKey="name" 
-                stroke="#64748b"
-                fontSize={12}
-              />
+              <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
+              <XAxis dataKey="name" stroke={axisColor} fontSize={12} />
               <YAxis 
-                stroke="#64748b"
-                fontSize={12}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                stroke={axisColor} 
+                fontSize={12} 
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} 
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="income" fill="#10b981" name="Income" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="spending" fill="#f59e0b" name="Spending" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="savings" fill="#3b82f6" name="Savings" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="income" fill="var(--income-color)" name="Income" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="spending" fill="var(--spending-color)" name="Spending" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="savings" fill="var(--savings-color)" name="Savings" radius={[4, 4, 0, 0]} />
             </BarChart>
           )}
         </ResponsiveContainer>
@@ -153,18 +151,16 @@ export default function SpendingChart({ timeRange }: SpendingChartProps) {
 
       {/* Legend */}
       <div className="flex items-center justify-center space-x-6 mt-4">
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-          <span className="text-sm text-slate-600 dark:text-slate-400">Income</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-          <span className="text-sm text-slate-600 dark:text-slate-400">Spending</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-          <span className="text-sm text-slate-600 dark:text-slate-400">Savings</span>
-        </div>
+        {[
+          { color: 'var(--income-color)', label: 'Income' },
+          { color: 'var(--spending-color)', label: 'Spending' },
+          { color: 'var(--savings-color)', label: 'Savings' },
+        ].map((item) => (
+          <div key={item.label} className="flex items-center">
+            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+            <span className="text-sm" style={{ color: 'var(--card-text-secondary)' }}>{item.label}</span>
+          </div>
+        ))}
       </div>
     </motion.div>
   );

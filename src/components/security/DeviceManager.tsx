@@ -13,7 +13,7 @@ const devices = [
 export default function DeviceManager() {
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+      <h3 className="text-xl font-bold ">
         Device Management
       </h3>
       <p className="text-slate-600 dark:text-slate-400">
@@ -35,7 +35,7 @@ export default function DeviceManager() {
                   {device.type === 'desktop' ? <Monitor className="h-5 w-5" /> : <Smartphone className="h-5 w-5" />}
                 </div>
                 <div>
-                  <h4 className="font-medium text-slate-900 dark:text-white">{device.name}</h4>
+                  <h4 className="font-medium ">{device.name}</h4>
                   <div className="flex items-center space-x-4 text-sm text-slate-500 dark:text-slate-400 mt-1">
                     <span className="flex items-center">
                       <MapPin className="h-3 w-3 mr-1" />

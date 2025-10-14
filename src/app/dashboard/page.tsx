@@ -1,11 +1,12 @@
 // src/app/dashboard/page.tsx
 import BalanceCard from '@/components/dashboard/BalanceCard';
+import DashboardCharts from '@/components/dashboard/dashboard';
 import QuickActions from '@/components/dashboard/QuickActions';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 
 export default function Dashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" >
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <BalanceCard
@@ -41,27 +42,7 @@ export default function Dashboard() {
       </div>
 
       {/* Additional Dashboard Widgets */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Spending Chart Placeholder */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-            Monthly Spending
-          </h3>
-          <div className="h-48 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center">
-            <p className="text-slate-500">Chart Component (Phase 6)</p>
-          </div>
-        </div>
-
-        {/* Goals Tracker Placeholder */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-            Savings Goals
-          </h3>
-          <div className="h-48 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center">
-            <p className="text-slate-500">Goals Tracker (Phase 6)</p>
-          </div>
-        </div>
-      </div>
+      <DashboardCharts/>
     </div>
   );
 }

@@ -24,7 +24,7 @@ export default function SecurityLog() {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+      <h3 className="text-xl font-bold ">
         Security Activity Log
       </h3>
       <p className="text-slate-600 dark:text-slate-400">
@@ -46,7 +46,7 @@ export default function SecurityLog() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-slate-900 dark:text-white">{log.event}</h4>
+                  <h4 className="font-medium ">{log.event}</h4>
                   <span className="text-xs text-slate-500 dark:text-slate-400">
                     {new Date(log.timestamp).toLocaleString()}
                   </span>

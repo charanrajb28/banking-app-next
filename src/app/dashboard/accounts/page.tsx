@@ -92,20 +92,29 @@ export default function AccountsPage() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Accounts</h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">
+          <h1 style={{ color: 'var(--card-text)' }} className="text-3xl font-bold">Accounts</h1>
+          <p style={{ color: 'var(--card-text-secondary)' }} className="mt-1">
             Manage your accounts and view transaction history
           </p>
         </div>
         <div className="mt-4 sm:mt-0 flex space-x-3">
           <button
             onClick={() => setShowBalances(!showBalances)}
-            className="flex items-center px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-colors"
+            className="flex items-center px-4 py-2 rounded-xl transition-colors"
+            style={{
+              backgroundColor: 'var(--card-bg-alt)',
+              color: 'var(--card-text)'
+            }}
           >
             {showBalances ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
             {showBalances ? 'Hide' : 'Show'} Balances
           </button>
-          <button className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl">
+          <button className="flex items-center px-4 py-2 rounded-xl transition-all shadow-lg"
+            style={{
+              background: 'linear-gradient(to right, var(--card-text), var(--card-text-secondary))',
+              color: 'white'
+            }}
+          >
             <Plus className="h-4 w-4 mr-2" />
             New Account
           </button>
@@ -116,25 +125,21 @@ export default function AccountsPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 text-white relative overflow-hidden"
+        className="rounded-3xl p-8 relative overflow-hidden"
       >
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl transform translate-x-32 -translate-y-32"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl transform -translate-x-16 translate-y-16"></div>
-        </div>
         
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-300 text-lg">Total Balance</p>
-              <h2 className="text-4xl font-bold mt-2">
+              <p style={{ color: 'var(--card-text-secondary)' }} className="text-lg">Total Balance</p>
+              <h2 style={{ color: 'var(--card-text)' }} className="text-4xl font-bold mt-2">
                 {showBalances ? formatCurrency(totalBalance) : '****'}
               </h2>
-              <p className="text-slate-300 mt-1">Across {accounts.length} accounts</p>
+              <p style={{ color: 'var(--card-text-secondary)' }} className="mt-1">Across {accounts.length} accounts</p>
             </div>
             <div className="text-right">
-              <p className="text-slate-300">This Month</p>
+              <p style={{ color: 'var(--card-text-secondary)' }}>This Month</p>
               <div className="flex items-center mt-2">
                 <TrendingUp className="h-5 w-5 text-green-400 mr-2" />
                 <span className="text-green-400 text-xl font-semibold">+$2,840</span>
@@ -154,7 +159,11 @@ export default function AccountsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="group bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700"
+              className="group rounded-2xl p-6 transition-all duration-300 border"
+              style={{
+                backgroundColor: 'var(--card-bg)',
+                borderColor: 'var(--card-bg-alt)'
+              }}
             >
               {/* Account Header */}
               <div className="flex items-center justify-between mb-4">
@@ -163,19 +172,21 @@ export default function AccountsPage() {
                     <IconComponent className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-white">{account.name}</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{account.accountNumber}</p>
+                    <h3 style={{ color: 'var(--card-text)' }} className="font-semibold">{account.name}</h3>
+                    <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm">{account.accountNumber}</p>
                   </div>
                 </div>
-                <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                  <MoreVertical className="h-4 w-4 text-slate-400" />
+                <button className="p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                  style={{ backgroundColor: 'var(--card-bg-alt)' }}
+                >
+                  <MoreVertical className="h-4 w-4" />
                 </button>
               </div>
 
               {/* Balance */}
               <div className="mb-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400">Available Balance</p>
-                <h4 className="text-2xl font-bold text-slate-900 dark:text-white">
+                <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm">Available Balance</p>
+                <h4 style={{ color: 'var(--card-text)' }} className="text-2xl font-bold">
                   {showBalances ? formatCurrency(account.balance) : '****'}
                 </h4>
               </div>
@@ -188,32 +199,35 @@ export default function AccountsPage() {
                   ) : (
                     <TrendingDown className="h-4 w-4 text-red-500" />
                   )}
-                  <span className={`text-sm font-medium ${
-                    account.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <span style={{ color: account.changeType === 'increase' ? '#16a34a' : '#dc2626' }} className="text-sm font-medium">
                     {account.changeType === 'increase' ? '+' : ''}{account.monthlyChange}%
                   </span>
-                  <span className="text-sm text-slate-500">this month</span>
+                  <span style={{ color: 'var(--card-text-secondary)' }} className="text-sm">this month</span>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Interest Rate</p>
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{account.interestRate}% APY</p>
+                  <p style={{ color: 'var(--card-text-secondary)' }} className="text-xs">Interest Rate</p>
+                  <p style={{ color: 'var(--card-text)' }} className="text-sm font-semibold">{account.interestRate}% APY</p>
                 </div>
               </div>
 
               {/* Quick Actions */}
               <div className="flex space-x-2">
-                <button className="flex-1 flex items-center justify-center py-2 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors text-sm font-medium">
+                <button className="flex-1 flex items-center justify-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
+                  style={{ backgroundColor: 'var(--card-bg-alt)', color: 'var(--card-text)' }}
+                >
                   <ArrowUpRight className="h-4 w-4 mr-1" />
                   Transfer
                 </button>
-                <button className="flex-1 flex items-center justify-center py-2 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors text-sm font-medium">
+                <button className="flex-1 flex items-center justify-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
+                  style={{ backgroundColor: 'var(--card-bg-alt)', color: 'var(--card-text)' }}
+                >
                   <Download className="h-4 w-4 mr-1" />
                   Statement
                 </button>
                 <button 
                   onClick={() => setSelectedAccount(account)}
-                  className="flex items-center justify-center py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  className="flex items-center justify-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
+                  style={{ backgroundColor: '#2563eb', color: '#fff' }}
                 >
                   <Settings className="h-4 w-4" />
                 </button>
@@ -224,10 +238,12 @@ export default function AccountsPage() {
       </div>
 
       {/* Recent Transactions Section */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
+      <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Recent Activity</h2>
-          <select className="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm border-none focus:ring-2 focus:ring-blue-500">
+          <h2 style={{ color: 'var(--card-text)' }} className="text-xl font-bold">Recent Activity</h2>
+          <select className="px-4 py-2 rounded-lg text-sm border-none focus:ring-2 transition-colors"
+            style={{ backgroundColor: 'var(--card-bg-alt)', color: 'var(--card-text)' }}
+          >
             <option>All Accounts</option>
             {accounts.map(account => (
               <option key={account.id} value={account.id}>{account.name}</option>
@@ -237,8 +253,8 @@ export default function AccountsPage() {
 
         {/* Transaction List */}
         <div className="space-y-4">
-          {[
-            {
+          {[...Array(4).keys()].map((index) => {
+            const transaction = index === 0 ? {
               id: '1',
               type: 'credit',
               description: 'Direct Deposit - Salary',
@@ -246,8 +262,7 @@ export default function AccountsPage() {
               date: '2025-10-13',
               account: 'Primary Savings',
               category: 'Income'
-            },
-            {
+            } : index === 1 ? {
               id: '2',
               type: 'debit',
               description: 'Transfer to Investment Account',
@@ -255,8 +270,7 @@ export default function AccountsPage() {
               date: '2025-10-12',
               account: 'Primary Savings',
               category: 'Transfer'
-            },
-            {
+            } : index === 2 ? {
               id: '3',
               type: 'credit',
               description: 'Investment Return',
@@ -264,8 +278,7 @@ export default function AccountsPage() {
               date: '2025-10-11',
               account: 'Investment Portfolio',
               category: 'Investment'
-            },
-            {
+            } : {
               id: '4',
               type: 'debit',
               description: 'Monthly Service Fee',
@@ -273,50 +286,38 @@ export default function AccountsPage() {
               date: '2025-10-10',
               account: 'Business Current',
               category: 'Fees'
-            }
-          ].map((transaction, index) => (
-            <motion.div
-              key={transaction.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
-            >
-              <div className="flex items-center space-x-4">
-                <div className={`p-2 rounded-full ${
-                  transaction.type === 'credit'
-                    ? 'bg-green-100 dark:bg-green-900/20'
-                    : 'bg-red-100 dark:bg-red-900/20'
-                }`}>
-                  {transaction.type === 'credit' ? (
-                    <ArrowDownLeft className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  ) : (
-                    <ArrowUpRight className="h-4 w-4 text-red-600 dark:text-red-400" />
-                  )}
+            };
+            return (
+              <motion.div
+                key={transaction.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="flex items-center justify-between p-4 rounded-xl transition-colors"
+                style={{ backgroundColor: 'var(--card-bg-alt)' }}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className={`p-2 rounded-full ${transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'}`} />
+                  <div>
+                    <p style={{ color: 'var(--card-text)' }} className="font-medium">{transaction.description}</p>
+                    <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm">
+                      {transaction.account} • {transaction.category}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-white">{transaction.description}</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {transaction.account} • {transaction.category}
+                <div className="text-right">
+                  <p style={{ color: transaction.type === 'credit' ? '#16a34a' : '#dc2626' }} className="font-semibold">
+                    {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount)}
                   </p>
+                  <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm">{transaction.date}</p>
                 </div>
-              </div>
-              <div className="text-right">
-                <p className={`font-semibold ${
-                  transaction.type === 'credit'
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-red-600 dark:text-red-400'
-                }`}>
-                  {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                </p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{transaction.date}</p>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
 
         <div className="mt-6 text-center">
-          <button className="text-blue-600 hover:text-blue-700 font-medium">
+          <button style={{ color: '#2563eb' }} className="font-medium hover:text-blue-700">
             View All Transactions
           </button>
         </div>

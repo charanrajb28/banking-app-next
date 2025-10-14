@@ -3,6 +3,7 @@
 
 import { Bell, Search, Moon, Sun, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -30,7 +31,7 @@ export default function Header({
           </button>
 
           <div className="hidden lg:block ml-4">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold ">
               Dashboard
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -72,10 +73,17 @@ export default function Header({
 
           {/* Notifications */}
           <div className="relative">
-            <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-              <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-              <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-            </button>
+            <Link
+              key={"notifictions"}
+              href={"/dashboard/notifications"}
+              className="group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 relative"
+            >
+              <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+              </button>
+            </Link>
+            
           </div>
 
           {/* User Profile */}

@@ -1,18 +1,18 @@
-// src/components/analytics/CategoryBreakdown.tsx
 'use client';
 
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 const categoryData = [
-  { name: 'Food & Dining', value: 850, color: '#f59e0b', icon: '🍽️' },
-  { name: 'Shopping', value: 650, color: '#3b82f6', icon: '🛍️' },
-  { name: 'Transportation', value: 420, color: '#10b981', icon: '🚗' },
-  { name: 'Entertainment', value: 380, color: '#8b5cf6', icon: '🎬' },
-  { name: 'Utilities', value: 320, color: '#f97316', icon: '⚡' },
-  { name: 'Healthcare', value: 280, color: '#ef4444', icon: '🏥' },
-  { name: 'Other', value: 520, color: '#6b7280', icon: '📦' }
+  { name: 'Food & Dining', value: 850, iconClass: 'icon-food', colorVar: '--category-food' },
+  { name: 'Shopping', value: 650, iconClass: 'icon-shopping', colorVar: '--category-shopping' },
+  { name: 'Transportation', value: 420, iconClass: 'icon-transport', colorVar: '--category-transportation' },
+  { name: 'Entertainment', value: 380, iconClass: 'icon-entertainment', colorVar: '--category-entertainment' },
+  { name: 'Utilities', value: 320, iconClass: 'icon-utilities', colorVar: '--category-utilities' },
+  { name: 'Healthcare', value: 280, iconClass: 'icon-healthcare', colorVar: '--category-healthcare' },
+  { name: 'Other', value: 520, iconClass: 'icon-other', colorVar: '--category-other' }
 ];
+
 
 interface CategoryBreakdownProps {
   timeRange: string;
@@ -25,11 +25,18 @@ export default function CategoryBreakdown({ timeRange }: CategoryBreakdownProps)
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
-          <p className="font-semibold text-slate-900 dark:text-white">
-            {data.icon} {data.name}
-          </p>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+        <div className="p-3 rounded-xl shadow-lg border"
+             style={{
+               backgroundColor: 'var(--card-bg)',
+               borderColor: 'var(--card-bg-alt)',
+               color: 'var(--card-text)'
+             }}
+        >
+          <div className="flex items-center space-x-2">
+            <span className={`${data.iconClass} w-5 h-5`} />
+            <p className="font-semibold">{data.name}</p>
+          </div>
+          <p className="text-sm mt-1 text-[var(--card-text-secondary)]">
             ${data.value.toLocaleString()} ({((data.value / total) * 100).toFixed(1)}%)
           </p>
         </div>
@@ -43,11 +50,12 @@ export default function CategoryBreakdown({ timeRange }: CategoryBreakdownProps)
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg"
+      className="rounded-2xl p-6 shadow-lg"
+      style={{ backgroundColor: 'var(--card-bg)', color: 'var(--card-text)' }}
     >
       <div className="mb-6">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Spending by Category</h3>
-        <p className="text-slate-500 dark:text-slate-400 text-sm">
+        <h3 className="text-xl font-bold">Spending by Category</h3>
+        <p className="text-sm text-[var(--card-text-secondary)]">
           Where your money goes this month
         </p>
       </div>
@@ -65,7 +73,10 @@ export default function CategoryBreakdown({ timeRange }: CategoryBreakdownProps)
               dataKey="value"
             >
               {categoryData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={`var(${entry.colorVar})`}
+                />
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} />
@@ -73,7 +84,6 @@ export default function CategoryBreakdown({ timeRange }: CategoryBreakdownProps)
         </ResponsiveContainer>
       </div>
 
-      {/* Category List */}
       <div className="space-y-3 mt-4">
         {categoryData.map((category, index) => (
           <motion.div
@@ -86,18 +96,14 @@ export default function CategoryBreakdown({ timeRange }: CategoryBreakdownProps)
             <div className="flex items-center space-x-3">
               <div 
                 className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: category.color }}
+                style={{ backgroundColor: `var(${category.colorVar})` }}
               ></div>
-              <span className="text-lg mr-2">{category.icon}</span>
-              <span className="text-sm font-medium text-slate-900 dark:text-white">
-                {category.name}
-              </span>
+              <span className={`${category.iconClass} w-5 h-5`} />
+              <span className="text-sm font-medium">{category.name}</span>
             </div>
             <div className="text-right">
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                ${category.value.toLocaleString()}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-sm font-semibold">{`$${category.value.toLocaleString()}`}</p>
+              <p className="text-xs text-[var(--card-text-secondary)]">
                 {((category.value / total) * 100).toFixed(1)}%
               </p>
             </div>

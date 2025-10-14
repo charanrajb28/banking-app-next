@@ -69,9 +69,16 @@ export default function Layout({ children }: LayoutProps) {
           </aside>
 
           {/* Main Content */}
-          <main className="col-span-5 lg:col-span-4 overflow-auto p-4 lg:p-6">
+          <main
+            className="col-span-5 lg:col-span-4 overflow-auto p-4 lg:p-6 transition-colors duration-300"
+            style={{
+              backgroundColor: 'var(--background)',
+              color: 'var(--text-primary)',
+            }}
+          >
             {children}
           </main>
+
         </div>
       </div>
     </div>

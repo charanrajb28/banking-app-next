@@ -54,7 +54,7 @@ export default function PasswordSettings() {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+      <h3 className="text-xl font-bold ">
         Password & Security
       </h3>
       
@@ -238,7 +238,7 @@ export default function PasswordSettings() {
 
       {/* Quick Actions */}
       <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-6">
-        <h4 className="font-semibold text-slate-900 dark:text-white mb-4">Recommended Actions</h4>
+        <h4 className="font-semibold  mb-4">Recommended Actions</h4>
         
         <div className="space-y-3">
           <button className="flex items-center justify-between w-full p-3 bg-white dark:bg-slate-800 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
@@ -246,7 +246,7 @@ export default function PasswordSettings() {
               <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
                 <RefreshCw className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <span className="font-medium text-slate-900 dark:text-white">Generate Strong Password</span>
+              <span className="font-medium ">Generate Strong Password</span>
             </div>
             <ChevronRight className="h-5 w-5 text-slate-400" />
           </button>
@@ -256,7 +256,7 @@ export default function PasswordSettings() {
               <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
                 <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
-              <span className="font-medium text-slate-900 dark:text-white">Enable Password Manager</span>
+              <span className="font-medium ">Enable Password Manager</span>
             </div>
             <ChevronRight className="h-5 w-5 text-slate-400" />
           </button>

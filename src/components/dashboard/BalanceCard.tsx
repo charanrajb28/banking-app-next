@@ -36,6 +36,7 @@ export default function BalanceCard({
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
+      whileHover={{ scale: 1.03, boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}
       animate={{ opacity: 1, y: 0 }}
       className={`relative overflow-hidden rounded-2xl p-6 text-white shadow-xl ${gradient}`}
     >
