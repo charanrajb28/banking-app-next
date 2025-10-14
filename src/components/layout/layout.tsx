@@ -15,27 +15,30 @@ export default function Layout({ children }: LayoutProps) {
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    // Check for saved theme preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
+  const html = document.documentElement;
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  html.setAttribute('data-theme', savedTheme);
+  setDarkMode(savedTheme === 'dark');
+}, []);
+
 
   const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    if (!darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
+  const html = document.documentElement;
+  if (darkMode) {
+    html.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+    setDarkMode(false);
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+    setDarkMode(true);
+  }
+};
+
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 ${darkMode ? 'dark' : ''}`}>
+      
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -49,26 +52,25 @@ export default function Layout({ children }: LayoutProps) {
         )}
       </AnimatePresence>
 
-      <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar 
-          sidebarOpen={sidebarOpen} 
+      <div className="flex flex-col h-screen overflow-hidden">
+        {/* Header */}
+        <Header 
+          sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
+          darkMode={darkMode}
+          toggleTheme={toggleTheme}
         />
 
-        {/* Main Content */}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <Header 
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            darkMode={darkMode}
-            toggleTheme={toggleTheme}
-          />
-          
-          <main className="flex-1 overflow-auto">
-            <div className="p-4 lg:p-6">
-              {children}
-            </div>
+        {/* Grid Layout */}
+        <div className="flex-1 grid grid-cols-5 h-full overflow-hidden">
+          {/* Sidebar */}
+          <aside className={`col-span-5 lg:col-span-1 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static z-50 h-full`}>
+            <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          </aside>
+
+          {/* Main Content */}
+          <main className="col-span-5 lg:col-span-4 overflow-auto p-4 lg:p-6">
+            {children}
           </main>
         </div>
       </div>

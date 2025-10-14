@@ -1,46 +1,76 @@
-/* src/app/globals.css */
-@tailwind base;
-@tailwind components; 
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
-  }
-  
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.0%;
-  }
+/* Default (light) theme */
+:root {
+  /* --background: #f1f5f9; fallback background */
+  --background-gradient-start: #f8fafc; 
+  --background-gradient-end: #e2e8f0; 
+  /* --foreground: #171717; */
+  --header-bg: rgba(255, 255, 255, 0.8);
+  --sidebar-bg: #ffffff;
+  --input-bg: #f1f5f9;
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: monospace;
+  --sidebar-active-bg: #e0e7ff; /* light highlight */
+  --sidebar-active-text: #1e40af; /* active text color */
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --card-bg: #ffffff;
+  --card-bg-alt: #f1f5f9;
+  --card-text: #171717;
+  --card-text-secondary: #6b7280;
 }
 
+/* Dark theme */
+[data-theme='dark'] {
+  /* --background: #0a0a0a; */
+  --background-gradient-start: #111827;
+  --background-gradient-end: #1f2937;
+  /* --foreground: #ededed; */
+  --header-bg: rgba(30, 30, 30, 0.8);
+  --sidebar-bg: #1f2937;
+  --input-bg: #2c2c2c;
+  --sidebar-active-bg: #374151; /* dark highlight */
+  --sidebar-active-text: #93c5fd; /* active text color */
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  --card-bg: #1f2937;
+  --card-bg-alt: #374151;
+  --card-text: #ededed;
+  --card-text-secondary: #9ca3af;
+}
+
+/* Apply theme variables */
 body {
-  color: hsl(var(--foreground));
-  background: hsl(var(--background));
+  background: var(--background);
+  background-image: linear-gradient(to bottom right, var(--background-gradient-start), var(--background-gradient-end));
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Header and Sidebar */
+header {
+  background: var(--header-bg);
+  border-bottom: 1px solid #ccc;
+  transition: background 0.3s ease;
+}
+
+aside {
+  background: var(--sidebar-bg);
+  transition: background 0.3s ease;
+}
+
+input, textarea, select {
+  background: var(--input-bg);
+  color: var(--foreground);
+  border: 1px solid #ccc;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* For buttons and hover states */
+button {
+  transition: background 0.3s ease, color 0.3s ease;
 }

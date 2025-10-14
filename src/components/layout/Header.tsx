@@ -29,7 +29,7 @@ export default function Header({
             <Menu className="h-6 w-6 text-slate-600 dark:text-slate-400" />
           </button>
 
-          <div className="hidden lg:block">
+          <div className="hidden lg:block ml-4">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               Dashboard
             </h1>
@@ -47,7 +47,7 @@ export default function Header({
             <input
               type="text"
               placeholder="Search transactions..."
-              className="pl-10 pr-4 py-2 w-64 text-sm bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="pl-10 pr-4 py-2 w-64 text-sm bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
             />
           </div>
 
@@ -55,13 +55,18 @@ export default function Header({
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={toggleTheme}
+            onClick={() => {
+              toggleTheme();
+              // Sync with data-theme attribute
+              const html = document.documentElement;
+              html.setAttribute('data-theme', darkMode ? 'light' : 'dark');
+            }}
             className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           >
             {darkMode ? (
               <Sun className="h-5 w-5 text-yellow-500" />
             ) : (
-              <Moon className="h-5 w-5 text-slate-600" />
+              <Moon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
             )}
           </motion.button>
 
