@@ -42,7 +42,7 @@ export default function Dashboard() {
       </div>
 
       {/* Additional Dashboard Widgets */}
-      <DashboardCharts/>
+      {/* <DashboardCharts/> */}
     </div>
   );
 }

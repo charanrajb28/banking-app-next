@@ -78,10 +78,11 @@ export default function Header({
               href={"/dashboard/notifications"}
               className="group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 relative"
             >
-              <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-              </button>
+              <button className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+  <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+  <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-red-500 rounded-full"></span>
+</button>
+
             </Link>
             
           </div>

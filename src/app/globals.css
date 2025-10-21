@@ -15,7 +15,7 @@
   --foreground: #000000;
   --card-text: #000000;
   --card-text-secondary: #4b4b4b;
-  --card-bg: #ffffff;
+  --card-bg: #f5f5f5;
   --card-bg-alt: #f5f5f5;
 
   --green-50: #ecfdf5;
@@ -121,7 +121,7 @@ button {
 }
 
 .card {
-  @apply bg-[var(--card-bg)];
+  background: var(--card-bg);
   color: var(--card-text);
   transition: background 0.3s ease, color 0.3s ease;
 }
