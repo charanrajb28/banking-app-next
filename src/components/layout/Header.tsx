@@ -91,7 +91,7 @@ export default function Header({
           </button>
 
           <div className="hidden lg:block ml-4">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-black dark:text-white">
               Dashboard
             </h1>
             <motion.p
