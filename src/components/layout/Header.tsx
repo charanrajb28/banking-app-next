@@ -4,6 +4,7 @@
 import { Bell, Search, Moon, Sun, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -12,33 +13,72 @@ interface HeaderProps {
   toggleTheme: () => void;
 }
 
+interface User {
+  id?: string;
+  full_name?: string;
+  email?: string;
+  avatar_url?: string;
+}
+
 export default function Header({ 
   sidebarOpen, 
   setSidebarOpen, 
   darkMode, 
   toggleTheme 
 }: HeaderProps) {
- const storedUser = localStorage.getItem('CurrentUser');
-console.log("Retrieved CurrentUser from localStorage:", storedUser);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [userInitial, setUserInitial] = useState('');
 
-let user = null;
-try {
-  user = storedUser ? JSON.parse(storedUser) : null;
-} catch (error) {
-  console.error("Invalid JSON in localStorage for 'CurrentUser':", error);
-  localStorage.removeItem('CurrentUser'); // optional cleanup
-}
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
-console.log("Header User:", user);
+        const response = await fetch('/api/users/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-const userInitialArray = user?.full_name ? user.full_name.toUpperCase().split(' ') : [];
-const userInitial = userInitialArray.length >= 2
-  ? userInitialArray[0][0] + userInitialArray[1][0]
-  : userInitialArray[0]?.[0] || '';
+        if (response.ok) {
+          const data = await response.json();
+          const userData = data.user;
+          
+          setUser(userData);
 
-console.log("User Initial:", userInitial);
+          // Calculate user initials
+          if (userData?.full_name) {
+            const nameArray = userData.full_name.toUpperCase().split(' ');
+            const initials = nameArray.length >= 2
+              ? nameArray[0][0] + nameArray[1][0]
+              : nameArray[0]?.[0] || '';
+            setUserInitial(initials);
+          } else if (userData?.email) {
+            setUserInitial(userData.email[0].toUpperCase());
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-return (
+    fetchUser();
+  }, []);
+
+  const greeting = user?.full_name 
+    ? `Welcome back, ${user.full_name.split(' ')[0]}! Here's your financial overview.`
+    : "Welcome back! Here's your financial overview.";
+
+  return (
     <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30">
       <div className="flex items-center justify-between px-4 lg:px-6 py-4">
         {/* Left Side */}
@@ -51,12 +91,17 @@ return (
           </button>
 
           <div className="hidden lg:block ml-4">
-            <h1 className="text-2xl font-bold ">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               Dashboard
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Welcome back, John! Here's your financial overview.
-            </p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-sm text-slate-500 dark:text-slate-400"
+            >
+              {loading ? 'Loading...' : greeting}
+            </motion.p>
           </div>
         </div>
 
@@ -83,6 +128,7 @@ return (
               html.setAttribute('data-theme', darkMode ? 'light' : 'dark');
             }}
             className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {darkMode ? (
               <Sun className="h-5 w-5 text-yellow-500" />
@@ -92,27 +138,35 @@ return (
           </motion.button>
 
           {/* Notifications */}
-          <div className="relative">
-            <Link
-              key={"notifictions"}
-              href={"/dashboard/notifications"}
-              className="group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 relative"
-            >
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative"
+          >
+            <Link href="/dashboard/notifications">
               <button className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-  <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-  <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-red-500 rounded-full"></span>
-</button>
-
+                <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-red-500 rounded-full animate-pulse"></span>
+              </button>
             </Link>
-            
-          </div>
+          </motion.div>
 
           {/* User Profile */}
-          <div className="flex items-center">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-              <span className="text-sm font-medium text-white">{userInitial}</span>
-            </div>
-          </div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200 }}
+            className="flex items-center"
+          >
+            <Link href="/dashboard/profile">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center hover:shadow-lg transition-shadow cursor-pointer">
+                <span className="text-sm font-semibold text-white">
+                  {loading ? '...' : userInitial || 'U'}
+                </span>
+              </div>
+            </Link>
+          </motion.div>
         </div>
       </div>
     </header>

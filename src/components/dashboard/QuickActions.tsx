@@ -38,7 +38,7 @@ const quickActions = [
 
 export default function QuickActions() {
   return (
-    <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+    <div className="rounded-2xl p-6 shadow-lg col-span-2" style={{ backgroundColor: 'var(--card-bg)' }}>
       <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--card-text)' }}>
         Quick Actions
       </h2>

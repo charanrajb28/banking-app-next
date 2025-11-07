@@ -67,7 +67,7 @@ export default function RecentTransactions() {
   };
 
   return (
-    <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+    <div className="rounded-2xl p-6 shadow-lg col-span-3" style={{ backgroundColor: 'var(--card-bg)' }}>
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold" style={{ color: 'var(--card-text)' }}>
           Recent Transactions

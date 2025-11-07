@@ -71,6 +71,7 @@ export default function AccountDetailPage() {
   const [showBalance, setShowBalance] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [accountName, setAccountName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (accountId) {
@@ -131,6 +132,7 @@ export default function AccountDetailPage() {
 
   const handleUpdateAccountName = async () => {
     try {
+      setIsSaving(true);
       const token = localStorage.getItem('auth_token');
 
       const response = await fetch(`/api/accounts/${accountId}`, {
@@ -148,6 +150,8 @@ export default function AccountDetailPage() {
       }
     } catch (err) {
       console.error('Error updating account name:', err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -192,6 +196,40 @@ export default function AccountDetailPage() {
         return '📈';
       default:
         return '💳';
+    }
+  };
+
+  const handleDownloadCSV = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+
+      const response = await fetch(`/api/accounts/${accountId}/statement/download`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          start_date: null,
+          end_date: null,
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `statement-${accountId}-${Date.now()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        console.error('Download failed:', response.status);
+      }
+    } catch (err) {
+      console.error('Error downloading statement:', err);
     }
   };
 
@@ -240,11 +278,16 @@ export default function AccountDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="flex items-center justify-between"
+      >
         <div className="flex items-center space-x-4">
           <Link
             href="/dashboard/accounts"
-            className="p-2 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors hover:scale-110"
             style={{ backgroundColor: 'var(--card-bg-alt)' }}
           >
             <ArrowLeft className="h-5 w-5" style={{ color: 'var(--card-text)' }} />
@@ -256,20 +299,23 @@ export default function AccountDetailPage() {
             </p>
           </div>
         </div>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={fetchAccountData}
           className="flex items-center px-4 py-2 rounded-xl transition-colors"
           style={{ backgroundColor: 'var(--card-bg-alt)', color: 'var(--card-text)' }}
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
 
       {/* Account Card - Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.5, ease: 'easeOut' }}
         className={`rounded-3xl p-8 bg-gradient-to-br ${getAccountGradient(account.account_type)} text-white shadow-2xl relative overflow-hidden`}
       >
         {/* Background Pattern */}
@@ -281,38 +327,60 @@ export default function AccountDetailPage() {
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-8">
             <div className="flex items-center space-x-3">
-              <div className="text-4xl">{getAccountIcon(account.account_type)}</div>
-              <div>
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.2, duration: 0.5, type: 'spring', stiffness: 200 }}
+                className="text-4xl"
+              >
+                {getAccountIcon(account.account_type)}
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25 }}
+              >
                 {isEditing ? (
                   <div className="flex items-center space-x-2">
                     <input
                       type="text"
                       value={accountName}
                       onChange={(e) => setAccountName(e.target.value)}
-                      className="px-3 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white border-2 border-white/30 focus:border-white"
+                      className="px-3 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white border-2 border-white/30 focus:border-white outline-none"
+                      placeholder="Account name"
                     />
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={handleUpdateAccountName}
-                      className="p-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors"
+                      disabled={isSaving}
+                      className="p-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors disabled:opacity-50"
                     >
                       <CheckCircle className="h-5 w-5" />
-                    </button>
+                    </motion.button>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <h2 className="text-2xl font-bold">{account.account_name}</h2>
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => setIsEditing(true)}
                       className="p-1 hover:bg-white/20 rounded-lg transition-colors"
                     >
                       <Edit2 className="h-4 w-4" />
-                    </button>
+                    </motion.button>
                   </div>
                 )}
                 <p className="text-white/80 capitalize">{account.account_type} Account</p>
-              </div>
+              </motion.div>
             </div>
-            <div className="flex items-center space-x-2">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+              className="flex items-center space-x-2"
+            >
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 account.status === 'active' 
                   ? 'bg-green-500/20 text-green-100' 
@@ -320,28 +388,40 @@ export default function AccountDetailPage() {
               }`}>
                 {account.status}
               </span>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mb-6"
+          >
             <div className="flex items-center space-x-3 mb-2">
               <p className="text-white/80 text-sm">Available Balance</p>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setShowBalance(!showBalance)}
                 className="p-1 hover:bg-white/20 rounded-lg transition-colors"
               >
                 {showBalance ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </motion.button>
             </div>
             <h3 className="text-5xl font-bold">
-              {showBalance ? formatCurrency(parseFloat(account.balance.toString()), account.currency) : '****'}
+              {showBalance ? formatCurrency(parseFloat(account.balance.toString()), account.currency) : '••••••'}
             </h3>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
               <p className="text-white/70 text-sm mb-1">Account Number</p>
-              <p className="font-mono font-semibold">{account.account_number}</p>
+              <p className="font-mono font-semibold">****{account.account_number.slice(-4)}</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
               <p className="text-white/70 text-sm mb-1">Currency</p>
@@ -357,12 +437,17 @@ export default function AccountDetailPage() {
               <p className="text-white/70 text-sm mb-1">Opened On</p>
               <p className="font-semibold">{new Date(account.created_at).toLocaleDateString()}</p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.5, ease: 'easeOut' }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-4"
+      >
         <Link
           href={`/dashboard/transactions/transfer?from=${account.id}`}
           className="rounded-xl p-6 transition-all hover:shadow-lg"
@@ -380,7 +465,7 @@ export default function AccountDetailPage() {
         </Link>
 
         <Link
-          href={`/dashboard/accounts/${account.id}/statements`}
+          href={`/dashboard/accounts/${account.id}/statement`}
           className="rounded-xl p-6 transition-all hover:shadow-lg"
           style={{ backgroundColor: 'var(--card-bg)' }}
         >
@@ -395,9 +480,12 @@ export default function AccountDetailPage() {
           </div>
         </Link>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           className="rounded-xl p-6 transition-all hover:shadow-lg text-left"
           style={{ backgroundColor: 'var(--card-bg)' }}
+          onClick={handleDownloadCSV}
         >
           <div className="flex items-center space-x-3">
             <div className="p-3 bg-green-100 rounded-xl">
@@ -405,12 +493,13 @@ export default function AccountDetailPage() {
             </div>
             <div>
               <p className="font-semibold" style={{ color: 'var(--card-text)' }}>Download</p>
-              <p className="text-sm" style={{ color: 'var(--card-text-secondary)' }}>Get PDF</p>
+              <p className="text-sm" style={{ color: 'var(--card-text-secondary)' }}>Get CSV</p>
             </div>
           </div>
-        </button>
+        </motion.button>
 
-        <button
+        <Link
+          href={`/dashboard/accounts/${account.id}/settings`}
           className="rounded-xl p-6 transition-all hover:shadow-lg text-left"
           style={{ backgroundColor: 'var(--card-bg)' }}
         >
@@ -423,11 +512,16 @@ export default function AccountDetailPage() {
               <p className="text-sm" style={{ color: 'var(--card-text-secondary)' }}>Manage</p>
             </div>
           </div>
-        </button>
-      </div>
+        </Link>
+      </motion.div>
 
       {/* Account Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5, ease: 'easeOut' }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+      >
         <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-medium" style={{ color: 'var(--card-text-secondary)' }}>Monthly Income</p>
@@ -454,14 +548,20 @@ export default function AccountDetailPage() {
           <p className="text-3xl font-bold" style={{ color: 'var(--card-text)' }}>{recentTransactions.length}</p>
           <p className="text-sm mt-2" style={{ color: 'var(--card-text-secondary)' }}>This month</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Recent Transactions */}
-      <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.5, ease: 'easeOut' }}
+        className="rounded-2xl p-6 shadow-lg" 
+        style={{ backgroundColor: 'var(--card-bg)' }}
+      >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold" style={{ color: 'var(--card-text)' }}>Recent Transactions</h3>
           <Link
-            href={`/dashboard/accounts/${account.id}/statements`}
+            href={`/dashboard/accounts/${account.id}/statement`}
             className="text-blue-600 hover:text-blue-700 font-medium text-sm"
           >
             View All →
@@ -474,23 +574,31 @@ export default function AccountDetailPage() {
               No recent transactions
             </p>
           ) : (
-            recentTransactions.map((transaction) => {
-              const isCredit = ['deposit', 'refund', 'transfer_in', 'interest'].includes(transaction.transaction_type);
+            recentTransactions.map((transaction, index) => {
+              const isCredit = ['deposit', 'refund', 'transfer_in', 'interest', 'salary'].includes(transaction.transaction_type);
               
               return (
-                <div
+                <motion.div
                   key={transaction.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.3, ease: 'easeOut' }}
                   className="flex items-center justify-between p-4 rounded-xl transition-colors"
                   style={{ backgroundColor: 'var(--card-bg-alt)' }}
                 >
                   <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-full ${isCredit ? 'bg-green-100' : 'bg-red-100'}`}>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: index * 0.05 + 0.1, type: 'spring', stiffness: 200 }}
+                      className={`p-2 rounded-full ${isCredit ? 'bg-green-100' : 'bg-red-100'}`}
+                    >
                       {isCredit ? (
                         <ArrowDownLeft className="h-5 w-5 text-green-600" />
                       ) : (
                         <ArrowUpRight className="h-5 w-5 text-red-600" />
                       )}
-                    </div>
+                    </motion.div>
                     <div>
                       <p className="font-medium" style={{ color: 'var(--card-text)' }}>
                         {transaction.description || transaction.transaction_type}
@@ -504,23 +612,34 @@ export default function AccountDetailPage() {
                     <p className={`font-semibold ${isCredit ? 'text-green-600' : 'text-red-600'}`}>
                       {isCredit ? '+' : '-'}{formatCurrency(parseFloat(transaction.amount.toString()), transaction.currency)}
                     </p>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      transaction.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: index * 0.05 + 0.15, type: 'spring', stiffness: 200 }}
+                      className={`text-xs px-2 py-1 rounded-full inline-block ${
+                        transaction.status === 'completed' ? 'bg-green-100 text-green-700' :
+                        transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                      }`}
+                    >
                       {transaction.status}
-                    </span>
+                    </motion.span>
                   </div>
-                </div>
+                </motion.div>
               );
             })
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Danger Zone */}
-      <div className="rounded-2xl p-6 shadow-lg border-2 border-red-200" style={{ backgroundColor: 'var(--card-bg)' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5, ease: 'easeOut' }}
+        className="rounded-2xl p-6 shadow-lg border-2 border-red-200" 
+        style={{ backgroundColor: 'var(--card-bg)' }}
+      >
         <h3 className="text-xl font-bold text-red-600 mb-4">Danger Zone</h3>
         <div className="flex items-center justify-between">
           <div>
@@ -529,15 +648,17 @@ export default function AccountDetailPage() {
               Permanently close this account. This action cannot be undone.
             </p>
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleCloseAccount}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
           >
             <Trash2 className="h-4 w-4" />
             <span>Close Account</span>
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

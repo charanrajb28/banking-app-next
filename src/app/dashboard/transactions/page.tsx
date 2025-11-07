@@ -43,16 +43,52 @@ interface Transaction {
   };
 }
 
+
 const categories = [
   { id: 'all', name: 'All Categories' },
-  { id: 'income', name: 'Income' },
-  { id: 'transfer', name: 'Transfers' },
-  { id: 'shopping', name: 'Shopping' },
-  { id: 'food', name: 'Food & Dining' },
-  { id: 'entertainment', name: 'Entertainment' },
-  { id: 'bills', name: 'Bills' },
+  { id: 'personal', name: 'Personal' },
+  { id: 'business', name: 'Business' },
+  { id: 'family', name: 'Family' },
+  { id: 'investment', name: 'Investment' },
+  { id: 'loan', name: 'Loan' },
+  { id: 'transfer', name: 'Transfer' },
   { id: 'other', name: 'Other' }
 ];
+
+// Rolling number component
+const RollingNumber = ({ value, showValue, duration = 2000 }: { value: number; showValue: boolean; duration?: number }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    if (!showValue) return;
+
+    const steps = 60;
+    const stepValue = value / steps;
+    let currentStep = 0;
+
+    const interval = setInterval(() => {
+      currentStep++;
+      setDisplayValue(Math.floor(stepValue * currentStep));
+
+      if (currentStep >= steps) {
+        setDisplayValue(value);
+        clearInterval(interval);
+      }
+    }, duration / steps);
+
+    return () => clearInterval(interval);
+  }, [value, showValue, duration]);
+
+  return (
+    <motion.span
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      ${displayValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+    </motion.span>
+  );
+};
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -63,6 +99,7 @@ export default function TransactionsPage() {
   const [dateRange, setDateRange] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const router = useRouter();
+
   useEffect(() => {
     fetchTransactions();
   }, [dateRange, statusFilter]);
@@ -76,7 +113,6 @@ export default function TransactionsPage() {
         throw new Error('Please login to view transactions');
       }
 
-      // Build query parameters
       const params = new URLSearchParams({
         limit: '100',
         offset: '0',
@@ -86,7 +122,6 @@ export default function TransactionsPage() {
         params.append('status', statusFilter);
       }
 
-      // Add date range filter
       if (dateRange !== 'all') {
         const dates = getDateRange(dateRange);
         if (dates.start) params.append('start_date', dates.start);
@@ -213,7 +248,6 @@ export default function TransactionsPage() {
   };
 
   const getTransactionType = (transaction: Transaction) => {
-    // Determine if it's a credit or debit based on transaction type
     const creditTypes = ['deposit', 'refund', 'transfer_in', 'interest', 'salary'];
     return creditTypes.includes(transaction.transaction_type) ? 'credit' : 'debit';
   };
@@ -260,7 +294,12 @@ export default function TransactionsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      >
         <div>
           <h1 style={{ color: 'var(--card-text)' }} className="text-3xl font-bold">Transactions</h1>
           <p style={{ color: 'var(--card-text-secondary)' }} className="mt-1">
@@ -286,13 +325,15 @@ export default function TransactionsPage() {
             New Transfer
           </Link>
         </div>
-      </div>
+      </motion.div>
 
       {/* Error Message */}
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
           className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start"
         >
           <AlertCircle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
@@ -302,62 +343,166 @@ export default function TransactionsPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+        {/* Total Income */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+          className="rounded-2xl p-6 shadow-lg" 
+          style={{ backgroundColor: 'var(--card-bg)' }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm">Total Income</p>
-              <p className="text-2xl font-bold text-green-600">
-                {formatCurrency(totalCredits)}
-              </p>
-              <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm mt-1">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
+                style={{ color: 'var(--card-text-secondary)' }} 
+                className="text-sm"
+              >
+                Total Income
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.25, duration: 0.4 }}
+                className="text-2xl font-bold text-green-600 mt-2"
+              >
+                <RollingNumber value={totalCredits} showValue={true} duration={2000} />
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+                style={{ color: 'var(--card-text-secondary)' }} 
+                className="text-sm mt-1"
+              >
                 This period
-              </p>
+              </motion.p>
             </div>
-            <div className="p-3 rounded-xl bg-green-100">
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.2, duration: 0.5, type: 'spring', stiffness: 200 }}
+              className="p-3 rounded-xl bg-green-100"
+            >
               <TrendingUp className="h-6 w-6 text-green-600" />
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+        {/* Total Expenses */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
+          className="rounded-2xl p-6 shadow-lg" 
+          style={{ backgroundColor: 'var(--card-bg)' }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm">Total Expenses</p>
-              <p className="text-2xl font-bold text-red-600">
-                {formatCurrency(totalDebits)}
-              </p>
-              <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm mt-1">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.3 }}
+                style={{ color: 'var(--card-text-secondary)' }} 
+                className="text-sm"
+              >
+                Total Expenses
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                className="text-2xl font-bold text-red-600 mt-2"
+              >
+                <RollingNumber value={totalDebits} showValue={true} duration={2000} />
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.35, duration: 0.3 }}
+                style={{ color: 'var(--card-text-secondary)' }} 
+                className="text-sm mt-1"
+              >
                 This period
-              </p>
+              </motion.p>
             </div>
-            <div className="p-3 rounded-xl bg-red-100">
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.25, duration: 0.5, type: 'spring', stiffness: 200 }}
+              className="p-3 rounded-xl bg-red-100"
+            >
               <TrendingDown className="h-6 w-6 text-red-600" />
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+        {/* Net Change */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 }}
+          className="rounded-2xl p-6 shadow-lg" 
+          style={{ backgroundColor: 'var(--card-bg)' }}
+        >
           <div className="flex items-center justify-between">
             <div>
-              <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm">Net Change</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {formatCurrency(totalCredits - totalDebits)}
-              </p>
-              <p style={{ color: 'var(--card-text-secondary)' }} className="text-sm mt-1">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+                style={{ color: 'var(--card-text-secondary)' }} 
+                className="text-sm"
+              >
+                Net Change
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.35, duration: 0.4 }}
+                className="text-2xl font-bold text-blue-600 mt-2"
+              >
+                <RollingNumber value={totalCredits - totalDebits} showValue={true} duration={2000} />
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.3 }}
+                style={{ color: 'var(--card-text-secondary)' }} 
+                className="text-sm mt-1"
+              >
                 This period
-              </p>
+              </motion.p>
             </div>
-            <div className="p-3 rounded-xl bg-blue-100">
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.3, duration: 0.5, type: 'spring', stiffness: 200 }}
+              className="p-3 rounded-xl bg-blue-100"
+            >
               <ArrowUpRight className="h-6 w-6 text-blue-600" />
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Filters & Search */}
-      <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut', delay: 0.25 }}
+        className="rounded-2xl p-6 shadow-lg" 
+        style={{ backgroundColor: 'var(--card-bg)' }}
+      >
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-          <div className="flex-1 max-w-md relative">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.4, ease: 'easeOut' }}
+            className="flex-1 max-w-md relative"
+          >
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
               style={{ color: 'var(--card-text-secondary)' }}
@@ -367,19 +512,26 @@ export default function TransactionsPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search transactions..."
-              className="w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none"
+              className="w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none transition-all"
               style={{
                 backgroundColor: 'var(--card-bg-alt)',
                 borderColor: 'var(--card-bg-alt)',
                 color: 'var(--card-text)'
               }}
             />
-          </div>
-          <div className="flex space-x-3">
-            <select
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.35, duration: 0.4, ease: 'easeOut' }}
+            className="flex space-x-3"
+          >
+            <motion.select
+              whileFocus={{ scale: 1.02 }}
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="px-4 py-3 rounded-xl"
+              className="px-4 py-3 rounded-xl transition-all cursor-pointer"
               style={{ backgroundColor: 'var(--card-bg-alt)', color: 'var(--card-text)' }}
             >
               <option value="all">All Time</option>
@@ -387,34 +539,48 @@ export default function TransactionsPage() {
               <option value="week">This Week</option>
               <option value="month">This Month</option>
               <option value="year">This Year</option>
-            </select>
-            <select
+            </motion.select>
+
+            <motion.select
+              whileFocus={{ scale: 1.02 }}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-3 rounded-xl"
+              className="px-4 py-3 rounded-xl transition-all cursor-pointer"
               style={{ backgroundColor: 'var(--card-bg-alt)', color: 'var(--card-text)' }}
             >
               <option value="all">All Status</option>
               <option value="completed">Completed</option>
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
-            </select>
-            <button
+            </motion.select>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleExport}
-              className="flex items-center px-4 py-3 rounded-xl"
+              className="flex items-center px-4 py-3 rounded-xl transition-all"
               style={{ backgroundColor: 'var(--card-bg-alt)', color: 'var(--card-text)' }}
             >
               <Download className="h-4 w-4 mr-2" />
               Export
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </div>
 
         {/* Category Tabs */}
-        <div className="flex space-x-1 rounded-xl p-1 mt-6 overflow-x-auto" style={{ backgroundColor: 'var(--card-bg-alt)' }}>
-          {categoryCounts.map(cat => (
-            <button
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.4, ease: 'easeOut' }}
+          className="flex space-x-1 rounded-xl p-1 mt-6 overflow-x-auto" 
+          style={{ backgroundColor: 'var(--card-bg-alt)' }}
+        >
+          {categoryCounts.map((cat, idx) => (
+            <motion.button
               key={cat.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + idx * 0.05, duration: 0.3, ease: 'easeOut' }}
               onClick={() => setSelectedCategory(cat.id)}
               className="flex items-center px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all"
               style={
@@ -422,9 +588,14 @@ export default function TransactionsPage() {
                   ? { backgroundColor: 'var(--card-bg)', color: 'var(--card-text)' }
                   : { color: 'var(--card-text-secondary)' }
               }
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {cat.name}
-              <span
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.45 + idx * 0.05, duration: 0.3 }}
                 className="ml-2 px-2 py-0.5 rounded-full text-xs"
                 style={
                   selectedCategory === cat.id
@@ -433,14 +604,20 @@ export default function TransactionsPage() {
                 }
               >
                 {cat.count}
-              </span>
-            </button>
+              </motion.span>
+            </motion.button>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Transaction List */}
-      <div className="rounded-2xl shadow-lg overflow-hidden" style={{ backgroundColor: 'var(--card-bg)' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 }}
+        className="rounded-2xl shadow-lg overflow-hidden" 
+        style={{ backgroundColor: 'var(--card-bg)' }}
+      >
         <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--card-bg-alt)' }}>
           <h3 style={{ color: 'var(--card-text)' }} className="text-lg font-semibold">
             Recent Activity ({filteredTransactions.length})
@@ -454,15 +631,23 @@ export default function TransactionsPage() {
             return (
               <motion.div
                 key={transaction.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
+                initial={{ opacity: 0, x: -30, height: 0 }}
+                animate={{ opacity: 1, x: 0, height: 'auto' }}
+                transition={{ delay: i * 0.08, duration: 0.5, ease: 'easeOut' }}
                 className="p-6 hover:bg-opacity-50 transition-colors cursor-pointer"
                 style={{ backgroundColor: 'var(--card-bg)' }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{
+                        delay: i * 0.08 + 0.1,
+                        duration: 0.4,
+                        type: 'spring',
+                        stiffness: 200
+                      }}
                       className="p-3 rounded-full"
                       style={{ backgroundColor: type === 'credit' ? '#dcfce7' : '#fee2e2' }}
                     >
@@ -471,8 +656,12 @@ export default function TransactionsPage() {
                       ) : (
                         <ArrowUpRight className="h-5 w-5 text-red-600" />
                       )}
-                    </div>
-                    <div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.08 + 0.15, duration: 0.4, ease: 'easeOut' }}
+                    >
                       <p style={{ color: 'var(--card-text)' }} className="font-semibold">
                         {transaction.description || transaction.transaction_type}
                       </p>
@@ -484,7 +673,10 @@ export default function TransactionsPage() {
                         <span>•</span>
                         <span>{transaction.payment_method || 'Bank Transfer'}</span>
                         <span>•</span>
-                        <span
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: i * 0.08 + 0.2, duration: 0.3 }}
                           className="text-xs px-2 py-1 rounded-full font-medium"
                           style={{
                             backgroundColor:
@@ -493,12 +685,17 @@ export default function TransactionsPage() {
                           }}
                         >
                           {transaction.status}
-                        </span>
+                        </motion.span>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
 
-                  <div className="flex items-center space-x-4">
+                  <motion.div
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.08 + 0.15, duration: 0.4, ease: 'easeOut' }}
+                    className="flex items-center space-x-4"
+                  >
                     <div className="text-right">
                       <p
                         className="font-bold text-lg"
@@ -512,13 +709,15 @@ export default function TransactionsPage() {
                         <p>{formatTime(transaction.created_at)}</p>
                       </div>
                     </div>
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
                       className="p-2 rounded-lg transition-colors"
                       style={{ color: 'var(--card-text-secondary)' }}
                     >
                       <MoreVertical className="h-4 w-4" />
-                    </button>
-                  </div>
+                    </motion.button>
+                  </motion.div>
                 </div>
               </motion.div>
             );
@@ -526,18 +725,49 @@ export default function TransactionsPage() {
         </div>
 
         {filteredTransactions.length === 0 && (
-          <div className="text-center py-12" style={{ color: 'var(--card-text-secondary)' }}>
-            <div
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="text-center py-12" 
+            style={{ color: 'var(--card-text-secondary)' }}
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.4, type: 'spring', stiffness: 200 }}
               className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
               style={{ backgroundColor: 'var(--card-bg-alt)' }}
             >
               <Search className="h-8 w-8" />
-            </div>
-            <p className="text-lg">No transactions found</p>
-            <p className="text-sm mt-1">Try adjusting your search or filter criteria</p>
-          </div>
+            </motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              className="text-lg"
+            >
+              No transactions found
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.3 }}
+              className="text-sm mt-1"
+            >
+              Try adjusting your search or filter criteria
+            </motion.p>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
+
+{/* <option value="personal">Personal</option>
+                <option value="business">Business</option>
+                <option value="family">Family Support</option>
+                <option value="investment">Investment</option>
+                <option value="loan">Loan Payment</option>
+                <option value="transfer">Transfer</option>
+                <option value="other">Other</option> */}
