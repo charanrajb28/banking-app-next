@@ -2,6 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, getUserFromRequest } from '@/lib/supabase';
 
+// src/app/api/transactions/route.ts
+// import { NextRequest, NextResponse } from 'next/server';
+// import { supabaseAdmin, getUserFromRequest } from '@/lib/supabase';
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getUserFromRequest(request);
@@ -10,20 +14,34 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
     const status = searchParams.get('status');
-    const type = searchParams.get('type');
+    const startDate = searchParams.get('start_date');
+    const endDate = searchParams.get('end_date');
 
     let query = supabaseAdmin
       .from('transactions')
-      .select('*')
+      .select(`
+        *,
+        from_account:from_account_id(account_name, account_number),
+        to_account:to_account_id(account_name, account_number)
+      `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (status) query = query.eq('status', status);
-    if (type) query = query.eq('transaction_type', type);
+    if (status && status !== 'all') {
+      query = query.eq('status', status);
+    }
+
+    if (startDate) {
+      query = query.gte('created_at', startDate);
+    }
+
+    if (endDate) {
+      query = query.lte('created_at', endDate);
+    }
 
     const { data, error } = await query;
 
@@ -31,12 +49,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ transactions: data });
+    return NextResponse.json({ transactions: data || [] });
 
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
 
 export async function POST(request: NextRequest) {
   try {

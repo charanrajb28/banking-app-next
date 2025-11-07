@@ -18,7 +18,27 @@ export default function Header({
   darkMode, 
   toggleTheme 
 }: HeaderProps) {
-  return (
+ const storedUser = localStorage.getItem('CurrentUser');
+console.log("Retrieved CurrentUser from localStorage:", storedUser);
+
+let user = null;
+try {
+  user = storedUser ? JSON.parse(storedUser) : null;
+} catch (error) {
+  console.error("Invalid JSON in localStorage for 'CurrentUser':", error);
+  localStorage.removeItem('CurrentUser'); // optional cleanup
+}
+
+console.log("Header User:", user);
+
+const userInitialArray = user?.full_name ? user.full_name.toUpperCase().split(' ') : [];
+const userInitial = userInitialArray.length >= 2
+  ? userInitialArray[0][0] + userInitialArray[1][0]
+  : userInitialArray[0]?.[0] || '';
+
+console.log("User Initial:", userInitial);
+
+return (
     <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30">
       <div className="flex items-center justify-between px-4 lg:px-6 py-4">
         {/* Left Side */}
@@ -90,7 +110,7 @@ export default function Header({
           {/* User Profile */}
           <div className="flex items-center">
             <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-              <span className="text-sm font-medium text-white">JD</span>
+              <span className="text-sm font-medium text-white">{userInitial}</span>
             </div>
           </div>
         </div>

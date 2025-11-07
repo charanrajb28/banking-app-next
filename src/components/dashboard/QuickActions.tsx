@@ -2,87 +2,80 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  CreditCard, 
-  PiggyBank,
-  QrCode,
-  Smartphone
-} from 'lucide-react';
+import { Send, TrendingUp, CreditCard, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
 
 const quickActions = [
   {
     name: 'Transfer Money',
-    icon: ArrowUpRight,
-    description: 'Send money to anyone',
-    color: 'bg-blue-500 hover:bg-blue-600',
-    href: '/dashboard/transfer'
+    icon: Send,
+    from: '#2563EB', // blue-600
+    to: '#1D4ED8',   // blue-700
+    href: '/dashboard/transactions/transfer',
   },
   {
     name: 'Request Money',
-    icon: ArrowDownLeft, 
-    description: 'Request payment from others',
-    color: 'bg-green-500 hover:bg-green-600',
-    href: '/dashboard/request'
+    icon: TrendingUp,
+    from: '#16A34A', // green-600
+    to: '#15803D',   // green-700
+    href: '/dashboard/request-money',
   },
   {
-    name: 'Pay Bills',
+    name: 'My Cards',
     icon: CreditCard,
-    description: 'Utilities, subscriptions, etc.',
-    color: 'bg-purple-500 hover:bg-purple-600',
-    href: '/dashboard/bills'
+    from: '#7C3AED', // purple-600
+    to: '#6D28D9',   // purple-700
+    href: '/dashboard/cards',
   },
   {
-    name: 'Save Money',
-    icon: PiggyBank,
-    description: 'Create savings goals',
-    color: 'bg-pink-500 hover:bg-pink-600',
-    href: '/dashboard/savings'
+    name: 'Analytics',
+    icon: BarChart3,
+    from: '#EA580C', // orange-600
+    to: '#C2410C',   // orange-700
+    href: '/dashboard/analytics',
   },
-  {
-    name: 'QR Payment',
-    icon: QrCode,
-    description: 'Scan & pay instantly',
-    color: 'bg-orange-500 hover:bg-orange-600',
-    href: '/dashboard/qr-pay'
-  },
-  {
-    name: 'Mobile Recharge',
-    icon: Smartphone,
-    description: 'Top up your mobile',
-    color: 'bg-teal-500 hover:bg-teal-600',
-    href: '/dashboard/recharge'
-  }
 ];
 
 export default function QuickActions() {
   return (
-    <div className="card rounded-2xl p-6 shadow-lg transition-colors duration-300">
-  <h2 className="text-xl font-bold mb-6">
-    Quick Actions
-  </h2>
+    <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
+      <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--card-text)' }}>
+        Quick Actions
+      </h2>
 
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-    {quickActions.map((action, index) => (
-      <motion.button
-        key={action.name}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.1 }}
-        whileHover={{ y: -2 }}
-        whileTap={{ scale: 0.98 }}
-        className={`${action.color} rounded-xl p-4 text-white transition-all duration-200 shadow-lg hover:shadow-xl`}
-      >
-        <div className="flex flex-col items-center text-center">
-          <action.icon className="h-8 w-8 mb-2" />
-          <h3 className="font-semibold text-sm">{action.name}</h3>
-          <p className="text-xs opacity-90 mt-1">{action.description}</p>
-        </div>
-      </motion.button>
-    ))}
-  </div>
-</div>
-
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+        {quickActions.map((action, index) => (
+          <Link key={action.name} href={action.href}>
+            <motion.button
+              initial={{
+                opacity: 0,
+                y: 20,
+                backgroundImage: 'linear-gradient(to bottom right, var(--card-alt-bg), var(--card-alt-bg))',
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{
+                y: -4,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                backgroundImage: `linear-gradient(to bottom right, ${action.from}, ${action.to})`,
+                color: '#fff',
+              }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full rounded-xl p-6 text-black transition-all duration-200 shadow-lg hover:shadow-xl group"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="p-3 rounded-lg bg-white/20 group-hover:bg-white/30 transition-colors mb-3">
+                  <action.icon className="h-6 w-6" />
+                </div>
+                <h3 className="font-semibold text-sm">{action.name}</h3>
+              </div>
+            </motion.button>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }

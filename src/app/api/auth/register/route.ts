@@ -6,52 +6,85 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password, phone, full_name, date_of_birth } = await request.json();
 
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Validate input
+    if (!email || !password || !full_name) {
+      return NextResponse.json(
+        { error: 'Email, password, and full name are required' },
+        { status: 400 }
+      );
+    }
+
+    // Create auth user with auto-confirm email
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        full_name,
+        phone,
+      },
     });
 
     if (authError) {
+      console.error('Supabase auth error:', authError);
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 
-    // Create user profile
+    if (!authData.user) {
+      return NextResponse.json({ error: 'Failed to create user' }, { status: 400 });
+    }
+
+    // Create user profile in database
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .insert({
-        id: authData.user!.id,
+        id: authData.user.id,
         email,
         phone,
         full_name,
         date_of_birth,
+        kyc_status: 'pending',
+        risk_level: 'low',
+        role: 'customer',
+        two_factor_enabled: false,
       })
       .select()
       .single();
 
     if (userError) {
+      console.error('User profile creation error:', userError);
+      // Clean up auth user if profile creation fails
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json({ error: userError.message }, { status: 400 });
     }
 
     // Create default savings account
-    const accountNumber = `ACC${Math.floor(Math.random() * 10000000000).toString().padStart(10, '0')}`;
+    // const accountNumber = `ACC${Math.floor(Math.random() * 10000000000).toString().padStart(10, '0')}`;
     
-    await supabaseAdmin
-      .from('accounts')
-      .insert({
-        user_id: authData.user!.id,
-        account_number: accountNumber,
-        account_type: 'savings',
-        account_name: 'Primary Savings',
-        balance: 0.00,
-      });
+    
+
+    // Generate session for the user
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email: email,
+    });
+
+    // Sign in the user to get a session
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     return NextResponse.json({
       user: userData,
-      session: authData.session,
+      session: signInData?.session || null,
+      message: 'Registration successful!',
     }, { status: 201 });
 
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Registration error:', error);
+    return NextResponse.json({ 
+      error: error.message || 'Registration failed',
+    }, { status: 500 });
   }
 }

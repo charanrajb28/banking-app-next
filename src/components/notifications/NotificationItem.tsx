@@ -1,29 +1,19 @@
-// src/components/notifications/NotificationItem.tsx
+// src/components/notifications/NotificationItem.tsx - UPDATED
 'use client';
 
 import { motion } from 'framer-motion';
-import { 
-  Check, 
-  Trash2, 
-  ExternalLink, 
-  Clock,
-  AlertTriangle,
-  Info,
-  CheckCircle
-} from 'lucide-react';
+import { Check, Trash2, ArrowRight, Send, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 interface Notification {
   id: string;
   type: string;
   title: string;
   message: string;
-  timestamp: string;
-  read: boolean;
-  category: string;
-  priority: 'low' | 'medium' | 'high';
-  icon: string;
-  actionUrl: string | null;
+  status: 'read' | 'unread';
+  created_at: string;
+  data?: any;
 }
 
 interface NotificationItemProps {
@@ -41,155 +31,170 @@ export default function NotificationItem({
   isSelected,
   onToggleSelect,
   onMarkAsRead,
-  onDelete
+  onDelete,
 }: NotificationItemProps) {
-  
-  const formatTimeAgo = (timestamp: string) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const getActionButton = () => {
+    if (notification.type === 'payment_request') {
+      return {
+        label: 'Go to Transfer',
+        href: `/dashboard/transactions/transfer?to=${notification.data?.requesterId}`,
+        icon: Send
+      };
+    }
+    if (notification.type === 'transfer') {
+      return {
+        label: 'View Transaction',
+        href: '/dashboard/transactions',
+        icon: ArrowRight
+      };
+    }
+    return null;
+  };
+
+  const action = getActionButton();
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
     const now = new Date();
-    const notificationTime = new Date(timestamp);
-    const diffTime = Math.abs(now.getTime() - notificationTime.getTime());
-    const diffMinutes = Math.ceil(diffTime / (1000 * 60));
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
-    if (diffMinutes < 60) {
-      return `${diffMinutes}m ago`;
-    } else if (diffHours < 24) {
-      return `${diffHours}h ago`;
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)}h ago`;
     } else {
-      return `${diffDays}d ago`;
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'border-red-200 dark:border-red-800';
-      case 'medium': return 'border-yellow-200 dark:border-yellow-800';
-      case 'low': return 'border-slate-200 dark:border-slate-700';
-      default: return 'border-slate-200 dark:border-slate-700';
-    }
-  };
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'high': return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'medium': return <Info className="h-4 w-4 text-yellow-500" />;
-      case 'low': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      default: return null;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'security': return 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400';
-      case 'transaction': return 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400';
-      case 'budget': return 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'achievement': return 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'system': return 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400';
-      case 'investment': return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400';
-      default: return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
-    }
-  };
+  const isMoneyReceived = notification.data?.transactionType === 'transfer_in';
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={`p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all cursor-pointer border-l-4 ${
-        !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
-      } ${getPriorityColor(notification.priority)} ${
-        isSelected ? 'bg-blue-100 dark:bg-blue-900/20' : ''
-      }`}
+      onClick={() => {
+        if (notification.status === 'unread') {
+          onMarkAsRead(notification.id);
+        }
+      }}
+      className={`p-6 border-b transition-all cursor-pointer hover:bg-opacity-50`}
+      style={{
+        borderColor: 'var(--card-bg-alt)',
+        backgroundColor: notification.status === 'unread' ? 'var(--card-bg-alt)' : 'transparent'
+      }}
     >
       <div className="flex items-start space-x-4">
-        {/* Selection Checkbox */}
-        <button
-          onClick={() => onToggleSelect(notification.id)}
-          className={`mt-1 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-            isSelected 
-              ? 'bg-blue-600 border-blue-600' 
-              : 'border-slate-300 dark:border-slate-600 hover:border-blue-500'
-          }`}
-        >
-          {isSelected && <Check className="h-3 w-3 text-white" />}
-        </button>
+        {/* Checkbox */}
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => onToggleSelect(notification.id)}
+          onClick={(e) => e.stopPropagation()}
+          className="w-5 h-5 rounded border-2 mt-1 cursor-pointer"
+        />
 
-        {/* Notification Icon */}
-        <div className="flex-shrink-0">
-          <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-2xl">
-            {notification.icon}
-          </div>
+        {/* Icon */}
+        <div className={`p-3 rounded-lg flex-shrink-0 ${
+          isMoneyReceived 
+            ? 'bg-green-100' 
+            : notification.type === 'payment_request'
+            ? 'bg-blue-100'
+            : 'bg-gray-100'
+        }`}>
+          {isMoneyReceived ? (
+            <TrendingDown className="h-5 w-5 text-green-600" />
+          ) : notification.type === 'payment_request' ? (
+            <Send className="h-5 w-5 text-blue-600" />
+          ) : (
+            <TrendingUp className="h-5 w-5 text-gray-600" />
+          )}
         </div>
 
-        {/* Notification Content */}
+        {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <h4 className={`font-semibold truncate ${
-                  !notification.read 
-                    ? 'text-slate-900 dark:text-white' 
-                    : 'text-slate-700 dark:text-slate-300'
-                }`}>
-                  {notification.title}
-                </h4>
-                {!notification.read && (
-                  <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                )}
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(notification.category)}`}>
-                  {notification.category}
-                </span>
-              </div>
-              
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-semibold" style={{ color: 'var(--card-text)' }}>
+                {notification.title}
+              </h4>
+              <p className="text-sm mt-1" style={{ color: 'var(--card-text-secondary)' }}>
                 {notification.message}
               </p>
-              
-              <div className="flex items-center space-x-3 text-xs text-slate-500 dark:text-slate-400">
-                <div className="flex items-center">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {formatTimeAgo(notification.timestamp)}
-                </div>
-                <div className="flex items-center">
-                  {getPriorityIcon(notification.priority)}
-                  <span className="ml-1 capitalize">{notification.priority} priority</span>
-                </div>
-              </div>
             </div>
-
-            {/* Actions */}
-            <div className="flex items-center space-x-2 ml-4">
-              {notification.actionUrl && (
-                <Link 
-                  href={notification.actionUrl}
-                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
-                  title="View Details"
-                >
-                  <ExternalLink className="h-4 w-4 text-slate-400" />
-                </Link>
-              )}
-              
-              {!notification.read && (
-                <button
-                  onClick={() => onMarkAsRead(notification.id)}
-                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
-                  title="Mark as Read"
-                >
-                  <Check className="h-4 w-4 text-slate-400" />
-                </button>
-              )}
-              
-              <button
-                onClick={() => onDelete(notification.id)}
-                className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                title="Delete"
-              >
-                <Trash2 className="h-4 w-4 text-red-400" />
-              </button>
-            </div>
+            {notification.status === 'unread' && (
+              <div className="w-3 h-3 rounded-full bg-blue-600 flex-shrink-0 ml-2 mt-1"></div>
+            )}
           </div>
+
+          {/* Timestamp */}
+          <p className="text-xs mt-2" style={{ color: 'var(--card-text-secondary)' }}>
+            {formatDate(notification.created_at)}
+          </p>
+
+          {/* Detailed Info for Transfer */}
+          {notification.type === 'transfer' && notification.data && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-3 p-3 rounded-lg"
+              style={{ backgroundColor: 'var(--card-bg)' }}
+            >
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span style={{ color: 'var(--card-text-secondary)' }}>Amount:</span>
+                  <span className="font-semibold" style={{ color: 'var(--card-text)' }}>
+                    ${notification.data.amount}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: 'var(--card-text-secondary)' }}>Transaction ID:</span>
+                  <span className="font-mono text-xs" style={{ color: 'var(--card-text)' }}>
+                    {notification.data.transactionId?.slice(-8)}
+                  </span>
+                </div>
+                {isMoneyReceived && notification.data.senderName && (
+                  <div className="flex justify-between">
+                    <span style={{ color: 'var(--card-text-secondary)' }}>From:</span>
+                    <span style={{ color: 'var(--card-text)' }}>
+                      {notification.data.senderName}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Action Buttons */}
+          {action && (
+            <div className="mt-3 flex items-center space-x-2">
+              <Link href={action.href}>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  <action.icon className="h-4 w-4 mr-1" />
+                  {action.label}
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
+
+        {/* Delete Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(notification.id);
+          }}
+          className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors flex-shrink-0"
+        >
+          <Trash2 className="h-5 w-5" />
+        </button>
       </div>
     </motion.div>
   );

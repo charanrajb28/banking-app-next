@@ -1,131 +1,140 @@
-// src/components/dashboard/RecentTransactions.tsx  
+// src/components/dashboard/RecentTransactions.tsx
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, ArrowDownLeft, MoreHorizontal } from 'lucide-react';
-import { format } from 'date-fns';
+import { ArrowUpRight, ArrowDownLeft, RefreshCw } from 'lucide-react';
+import Link from 'next/link';
 
-const transactions = [
-  { id: '1', type: 'credit', description: 'Salary Payment', amount: 5000.0, date: '2025-10-13', category: 'Income', status: 'completed' },
-  { id: '2', type: 'debit', description: 'Coffee Shop', amount: 15.5, date: '2025-10-12', category: 'Food & Dining', status: 'completed' },
-  { id: '3', type: 'debit', description: 'Netflix Subscription', amount: 12.99, date: '2025-10-11', category: 'Entertainment', status: 'completed' },
-];
+interface Transaction {
+  id: string;
+  transaction_id: string;
+  transaction_type: string;
+  amount: number;
+  currency: string;
+  status: string;
+  description?: string;
+  category?: string;
+  created_at: string;
+}
 
 export default function RecentTransactions() {
-  const formatAmount = (amount: number, type: string) => {
-    const formatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    return type === 'credit' ? `+${formatted}` : `-${formatted}`;
+  useEffect(() => {
+    fetchRecentTransactions();
+  }, []);
+
+  const fetchRecentTransactions = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('auth_token');
+
+      const response = await fetch('/api/transactions?limit=5', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setTransactions(data.transactions || []);
+      }
+    } catch (err) {
+      console.error('Error fetching transactions:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const getTransactionType = (type: string) => {
+    const creditTypes = ['deposit', 'refund', 'transfer_in', 'interest', 'salary'];
+    return creditTypes.includes(type) ? 'credit' : 'debit';
   };
 
   return (
-    <div className="card rounded-2xl p-6 shadow-lg transition-colors duration-300">
+    <div className="rounded-2xl p-6 shadow-lg" style={{ backgroundColor: 'var(--card-bg)' }}>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>
+        <h3 className="text-xl font-bold" style={{ color: 'var(--card-text)' }}>
           Recent Transactions
-        </h2>
-        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors">
-          View All
-        </button>
+        </h3>
+        <Link
+          href="/dashboard/transactions"
+          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+        >
+          View All →
+        </Link>
       </div>
 
-      <div className="space-y-4">
-        {transactions.map((transaction, index) => (
-          <motion.div
-            key={transaction.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="flex items-center justify-between p-3 rounded-xl transition-all duration-200 hover:brightness-95"
-            style={{ backgroundColor: 'var(--background)' }}
-          >
-            {/* Left section: icon + description */}
-            <div className="flex items-center space-x-3">
-              <div
-                className="p-2 rounded-full"
-                style={{
-                  backgroundColor:
-                    transaction.type === 'credit'
-                      ? 'rgba(34,197,94,0.15)' // green-500 tint
-                      : 'rgba(239,68,68,0.15)', // red-500 tint
-                }}
+      {loading ? (
+        <div className="flex items-center justify-center py-8">
+          <RefreshCw className="h-5 w-5 animate-spin" style={{ color: 'var(--card-text-secondary)' }} />
+        </div>
+      ) : transactions.length === 0 ? (
+        <p style={{ color: 'var(--card-text-secondary)' }} className="text-center py-8">
+          No transactions yet
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {transactions.map((txn, index) => {
+            const type = getTransactionType(txn.transaction_type);
+            return (
+              <motion.div
+                key={txn.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="flex items-center justify-between p-4 rounded-lg"
+                style={{ backgroundColor: 'var(--card-bg-alt)' }}
               >
-                {transaction.type === 'credit' ? (
-                  <ArrowDownLeft
-                    className="h-4 w-4"
+                <div className="flex items-center space-x-4">
+                  <div
+                    className="p-3 rounded-full"
                     style={{
-                      color:
-                        transaction.type === 'credit'
-                          ? '#22c55e' // green
-                          : '#ef4444', // red
+                      backgroundColor: type === 'credit' ? '#dcfce720' : '#fee2e220'
                     }}
-                  />
-                ) : (
-                  <ArrowUpRight
-                    className="h-4 w-4"
-                    style={{
-                      color:
-                        transaction.type === 'credit'
-                          ? '#22c55e'
-                          : '#ef4444',
-                    }}
-                  />
-                )}
-              </div>
-
-              <div>
-                <p className="font-medium" style={{ color: 'var(--foreground)' }}>
-                  {transaction.description}
-                </p>
-                <p className="text-sm opacity-70">
-                  {transaction.category} • {format(new Date(transaction.date), 'MM/dd/yyyy')}
-                </p>
-              </div>
-            </div>
-
-            {/* Right section: amount + status */}
-            <div className="flex items-center space-x-2">
-              <div className="text-right">
+                  >
+                    {type === 'credit' ? (
+                      <ArrowDownLeft className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <ArrowUpRight className="h-5 w-5 text-red-600" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--card-text)' }}>
+                      {txn.description || txn.category || txn.transaction_type}
+                    </p>
+                    <p className="text-sm" style={{ color: 'var(--card-text-secondary)' }}>
+                      {formatDate(txn.created_at)}
+                    </p>
+                  </div>
+                </div>
                 <p
-                  className="font-semibold"
-                  style={{
-                    color:
-                      transaction.type === 'credit'
-                        ? '#22c55e'
-                        : '#ef4444',
-                  }}
+                  className="font-bold"
+                  style={{ color: type === 'credit' ? '#16a34a' : '#dc2626' }}
                 >
-                  {formatAmount(transaction.amount, transaction.type)}
+                  {type === 'credit' ? '+' : '-'}
+                  {formatCurrency(parseFloat(txn.amount.toString()), txn.currency)}
                 </p>
-                <p
-                  className="text-xs"
-                  style={{
-                    color:
-                      transaction.status === 'completed'
-                        ? 'rgba(107,114,128,0.8)'
-                        : '#eab308', // yellow-500
-                  }}
-                >
-                  {transaction.status}
-                </p>
-              </div>
-
-              <button
-                className="p-1 rounded-full transition-colors"
-                style={{
-                  backgroundColor: 'transparent',
-                  color: 'rgba(156,163,175,0.8)',
-                }}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

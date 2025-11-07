@@ -24,7 +24,7 @@ const navigation = [
   { name: 'Transactions', href: '/dashboard/transactions', icon: ArrowUpDown },
   { name: 'Cards', href: '/dashboard/cards', icon: CreditCard },
   { name: 'Analytics', href: '/dashboard/analytics', icon: PieChart },
-  { name: 'Security', href: '/dashboard/security', icon: Shield },
+  // { name: 'Security', href: '/dashboard/security', icon: Shield },
 ];
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
