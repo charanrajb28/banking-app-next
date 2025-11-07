@@ -105,7 +105,7 @@ export default function AccountsPage() {
     try {
       const token = localStorage.getItem('auth_token');
 
-      const response = await fetch('/api/transactions?limit=10', {
+      const response = await fetch('/api/transactions?limit=5', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

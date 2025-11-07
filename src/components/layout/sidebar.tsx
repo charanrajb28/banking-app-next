@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import {
   Home,
   CreditCard,
@@ -27,8 +28,57 @@ const navigation = [
   // { name: 'Security', href: '/dashboard/security', icon: Shield },
 ];
 
+interface UserProfile {
+  full_name: string;
+}
+
 export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
   const pathname = usePathname();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setUserProfile(data.user);
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .slice(0, 2)
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  const initials = userProfile ? getInitials(userProfile.full_name) : 'U';
+  const fullName = userProfile?.full_name || 'User';
 
   return (
     <>
@@ -79,33 +129,40 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
           </nav>
 
           {/* Profile Section */}
-          <div
-            className="flex-shrink-0 p-5 mt-auto "
-            style={{
-              background: 'var(--card-bg-alt)',
-              boxShadow: '0 -2px 8px rgba(0,0,0,0.05)',
-            }}
-          >
-            <div className="flex items-center">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center shadow-sm">
-                <span className="text-sm font-medium text-white">JD</span>
-              </div>
-              <div className="ml-3">
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--sidebar-text)' }}
+          <Link href="/dashboard/profile">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-shrink-0 p-5 mt-auto cursor-pointer transition-all duration-200 group"
+              style={{
+                background: 'var(--card-bg-alt)',
+                boxShadow: '0 -2px 8px rgba(0,0,0,0.05)',
+              }}
+            >
+              <div className="flex items-center">
+                <motion.div
+                  whileHover={{ rotate: 5 }}
+                  className="h-10 w-10 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center shadow-sm"
                 >
-                  John Doe
-                </p>
-                <p
-                  className="text-xs"
-                  style={{ color: 'var(--sidebar-text-secondary)' }}
-                >
-                  Premium Account
-                </p>
+                  <span className="text-sm font-bold text-white">{initials}</span>
+                </motion.div>
+                <div className="ml-3">
+                  <p
+                    className="text-sm font-medium group-hover:text-blue-600 transition-colors"
+                    style={{ color: 'var(--sidebar-text)' }}
+                  >
+                    {fullName}
+                  </p>
+                  <p
+                    className="text-xs"
+                    style={{ color: 'var(--sidebar-text-secondary)' }}
+                  >
+                    View Profile
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </Link>
         </div>
       </div>
 
@@ -176,6 +233,43 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
               );
             })}
           </nav>
+
+          {/* Mobile Profile Section */}
+          <Link href="/dashboard/profile">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setSidebarOpen(false)}
+              className="flex-shrink-0 p-5 cursor-pointer transition-all duration-200 group"
+              style={{
+                background: 'var(--card-bg-alt)',
+                boxShadow: '0 -2px 8px rgba(0,0,0,0.05)',
+              }}
+            >
+              <div className="flex items-center">
+                <motion.div
+                  whileHover={{ rotate: 5 }}
+                  className="h-10 w-10 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center shadow-sm"
+                >
+                  <span className="text-sm font-bold text-white">{initials}</span>
+                </motion.div>
+                <div className="ml-3">
+                  <p
+                    className="text-sm font-medium group-hover:text-blue-600 transition-colors"
+                    style={{ color: 'var(--sidebar-text)' }}
+                  >
+                    {fullName}
+                  </p>
+                  <p
+                    className="text-xs"
+                    style={{ color: 'var(--sidebar-text-secondary)' }}
+                  >
+                    View Profile
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </Link>
         </div>
       </motion.div>
     </>

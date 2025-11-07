@@ -9,29 +9,29 @@ const quickActions = [
   {
     name: 'Transfer Money',
     icon: Send,
-    from: '#2563EB', // blue-600
-    to: '#1D4ED8',   // blue-700
+    baseColor: '#2563EB', // blue-600
+    colorShades: ['#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA'], // dark to light blue
     href: '/dashboard/transactions/transfer',
   },
   {
     name: 'Request Money',
     icon: TrendingUp,
-    from: '#16A34A', // green-600
-    to: '#15803D',   // green-700
+    baseColor: '#16A34A', // green-600
+    colorShades: ['#15803D', '#16A34A', '#22C55E', '#4ADE80'], // dark to light green
     href: '/dashboard/request-money',
   },
   {
     name: 'My Cards',
     icon: CreditCard,
-    from: '#7C3AED', // purple-600
-    to: '#6D28D9',   // purple-700
+    baseColor: '#7C3AED', // purple-600
+    colorShades: ['#6D28D9', '#7C3AED', '#A855F7', '#D8B4FE'], // dark to light purple
     href: '/dashboard/cards',
   },
   {
     name: 'Analytics',
     icon: BarChart3,
-    from: '#EA580C', // orange-600
-    to: '#C2410C',   // orange-700
+    baseColor: '#EA580C', // orange-600
+    colorShades: ['#C2410C', '#EA580C', '#F97316', '#FED7AA'], // dark to light orange
     href: '/dashboard/analytics',
   },
 ];
@@ -50,27 +50,57 @@ export default function QuickActions() {
               initial={{
                 opacity: 0,
                 y: 20,
-                backgroundImage: 'linear-gradient(to bottom right, var(--card-alt-bg), var(--card-alt-bg))',
               }}
               animate={{
                 opacity: 1,
                 y: 0,
               }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.1, duration: 0.4 }}
               whileHover={{
-                y: -4,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                backgroundImage: `linear-gradient(to bottom right, ${action.from}, ${action.to})`,
-                color: '#fff',
+                y: -6,
               }}
               whileTap={{ scale: 0.95 }}
-              className="w-full rounded-xl p-6 text-black transition-all duration-200 shadow-lg hover:shadow-xl group"
+              className="w-full rounded-xl p-6 transition-all duration-300 shadow-lg hover:shadow-2xl group relative overflow-hidden"
+              style={{
+                background: action.baseColor,
+                color: '#fff',
+              }}
             >
-              <div className="flex flex-col items-center text-center">
-                <div className="p-3 rounded-lg bg-white/20 group-hover:bg-white/30 transition-colors mb-3">
-                  <action.icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold text-sm">{action.name}</h3>
+              {/* Animated gradient overlay on hover */}
+              <motion.div
+                className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100"
+                initial={{ backgroundPosition: '0% 50%' }}
+                animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+                style={{
+                  backgroundImage: `linear-gradient(-45deg, ${action.colorShades[0]}, ${action.colorShades[1]}, ${action.colorShades[2]}, ${action.colorShades[3]}, ${action.colorShades[0]})`,
+                  backgroundSize: '300% 300%',
+                }}
+              />
+
+              {/* Content wrapper */}
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <motion.div
+                  className="p-3 rounded-lg backdrop-blur-sm group-hover:backdrop-blur-0 transition-all duration-300 mb-3"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  }}
+                  whileHover={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  }}
+                >
+                  <motion.div
+                    whileHover={{ rotate: 10, scale: 1.1 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <action.icon className="h-6 w-6" />
+                  </motion.div>
+                </motion.div>
+                <h3 className="font-semibold text-sm tracking-wide">{action.name}</h3>
               </div>
             </motion.button>
           </Link>

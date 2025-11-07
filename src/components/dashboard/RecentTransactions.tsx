@@ -40,7 +40,7 @@ export default function RecentTransactions() {
 
       const data = await response.json();
       if (response.ok) {
-        setTransactions(data.transactions || []);
+        setTransactions(data.transactions.slice(0,3) || []);
       }
     } catch (err) {
       console.error('Error fetching transactions:', err);
